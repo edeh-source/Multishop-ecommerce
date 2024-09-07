@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  celery:
+    build: .
+    command: celery -A amazon_web worker -l info
+    volumes:
+      - .:/code
+    depends_on:
+      - rabbitmq
+
+  flower:
+    image: mher/flower
+    ports:
+      - "6000:6000"
+    command:
+      - "celery"
+      - "--broker=amqp://guest:guest@rabbitmq:5672//"
+      - "flower"
+      - "--broker_api=http://guest:guest@rabbitmq:15672/api//"
+    depends_on:
+      - rabbitmq

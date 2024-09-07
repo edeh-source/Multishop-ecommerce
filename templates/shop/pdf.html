@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MULTI Shop Invoice</title>
+    <style>
+        /* Global Styles */
+        :root {
+            --primary-color: #333;
+            --secondary-color: #666;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --background-color: #f0f0f0;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        h3 {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .secondary {
+            color: var(--secondary-color);
+        }
+        
+        /* Table Styles */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--background-color);
+        }
+        
+        .num {
+            text-align: right;
+        }
+        
+        .total {
+            background-color: var(--background-color);
+            font-weight: bold;
+        }
+        
+        /* Status Styles */
+        .paid {
+            color: var(--success-color);
+        }
+        
+        .pending {
+            color: var(--danger-color);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            h3 {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MULTI Shop</h1>
+        <p>
+            Invoice no. {{ order.id }}<br>
+            <span class="secondary">
+                {{ order.created|date:"M d, Y" }}
+            </span>
+        </p>
+    </header>
+    <section>
+        <h3>Bill to</h3>
+        <p>
+            {{ order.user.first_name }} {{ order.user.last_name }}<br>
+            {{ order.user.email }}<br>
+            {{ order.country }}<br>
+            {{ order.postal_code }}, {{ order.region }}
+        </p>
+    </section>
+    <section>
+        <h3>Items bought</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr class="row{% cycle "1" "2" %}">
+                    
+                    <td class="align-middle"><img src="{{ images.image.url }}" alt="" style="width: 50px;"></td>
+                
+                    <td>{{ item.product.name }}</td>
+                    <td class="num">${{ item.price }}</td>
+                    <td class="num">{{ item.quantity }}</td>
+                    <td class="num">${{ item.get_cost }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total">
+                    <td colspan="3">Total</td>
+                    <td class="num">${{ order.get_total_sum }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    <footer>
+        <span class="{% if order.paid %}paid{% else %}pending{% endif %}">
+            {% if order.paid %}Paid{% else %}Pending payment{% endif %}
+        </span>
+    </footer>
+</body>
+</html>
